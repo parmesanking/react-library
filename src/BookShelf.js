@@ -15,17 +15,15 @@ class BookShelf extends React.Component{
         
         return(
             <div className="bookshelf">
-            <h2 className="bookshelf-title">{this.props.section}</h2>
-            <div className="bookshelf-books">
-              <ol className="books-grid">
-                {books}
-              </ol>
+                <h2 className="bookshelf-title">{this.props.section}</h2>
+                <div className="bookshelf-books">
+                <ol className="books-grid">
+                    {books}
+                </ol>
+                </div>
             </div>
-            </div>
-
         )
     }
-
 }
 
 export default BookShelf 

@@ -7,6 +7,7 @@ import './App.css'
 class BooksApp extends React.Component {
   state = {
     books : [],
+    orphanBooks:[],
     /**
      * TODO: Instead of using this state variable to keep track of which page
      * we're on, use the URL in the browser's address bar. This will ensure that
@@ -43,6 +44,13 @@ class BooksApp extends React.Component {
     })
   }
 
+  onSearch(e){
+    let query = e.target.value;
+    BooksAPI.search(query, 10).then((result) => {
+      this.setState({orphanBooks: result ? result : []})
+    })
+  }
+
   render() {
     return (
       <div className="app">
@@ -59,15 +67,15 @@ class BooksApp extends React.Component {
                   However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
                   you don't find a specific author or title. Every search is limited by search terms.
                 */}
-                <input type="text" placeholder="Search by title or author"/>
+                <input type="text" placeholder="Search by title or author" onChange={this.onSearch.bind(this)}/>
 
               </div>
             </div>
             <div className="search-books-results">
               <ol className="books-grid">
               {
-                this.state.books.map((book) =>{
-                  return( <li><Book book={book} /></li>)
+                this.state.orphanBooks.map((book) =>{
+                  return( <li key={book.id}><Book book={book} /></li>)
                 })
               }
               </ol>
