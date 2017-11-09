@@ -5,10 +5,10 @@ class ShelfSelector extends React.Component {
     onShelfMove(e){
         if (e.target.value === "none"){
             if(confirm('You are going to remove that book from your libray. Are you sure?')){
-                this.props.onShelfChange(this.props.book, e)
+                this.props.onShelfChange(this.props.book, e);
             }
         }else{
-            this.props.onShelfChange(this.props.book, e)
+            this.props.onShelfChange(this.props.book, e);
         }
     }
     
