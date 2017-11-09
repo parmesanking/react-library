@@ -3,8 +3,18 @@ import BookShelf from './BookShelf.js'
 import Book from './Book.js'
 import * as BooksAPI from './BooksAPI'
 import './App.css'
+import { debounce } from 'lodash'
 
 class BooksApp extends React.Component {
+  constructor(props) {
+    super(props);
+    this.doSearch = debounce((query) =>{
+      BooksAPI.search(query, 10).then((result) => {
+        this.setState({orphanBooks: result ? result : []})
+      })
+    },1000);
+  }
+
   state = {
     books : [],
     orphanBooks:[],
@@ -46,9 +56,12 @@ class BooksApp extends React.Component {
 
   onSearch(e){
     let query = e.target.value;
-    BooksAPI.search(query, 10).then((result) => {
-      this.setState({orphanBooks: result ? result : []})
-    })
+    //Searching on backend without http flooding
+    this.doSearch(query);
+  }
+
+  onBookPick(bookid){
+    console.log(bookid);
   }
 
   render() {
@@ -75,7 +88,9 @@ class BooksApp extends React.Component {
               <ol className="books-grid">
               {
                 this.state.orphanBooks.map((book) =>{
-                  return( <li key={book.id}><Book book={book} /></li>)
+                  return( <li key={book.id}>
+                            <Book book={book} onBookPick={this.onBookPick.bind(this)} />
+                          </li>)
                 })
               }
               </ol>
