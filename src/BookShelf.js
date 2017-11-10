@@ -8,7 +8,7 @@ class BookShelf extends React.Component{
         books = this.props.books && this.props.books.map((book) => {
             return(
             <li key={book.id}> 
-                <Book book={book} onShelfChange={this.props.onShelfChange} selector/>
+                <Book book={book} onShelfChange={this.props.onShelfChange}/>
             </li>
             )
         })

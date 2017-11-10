@@ -1,7 +1,7 @@
 import React from 'react'
 import { Route, BrowserRouter } from 'react-router-dom'
-import BookShelf from './BookShelf.js'
-import Book from './Book.js'
+import Library from './Library.js'
+import Finder from './Finder.js'
 import * as BooksAPI from './BooksAPI'
 import './App.css'
 import { debounce } from 'lodash'
@@ -31,8 +31,8 @@ class BooksApp extends React.Component {
     })
   }
   
-  onShelfChange(book, e){
-    BooksAPI.update(book, e.target.value).then((library) => {
+  onShelfChange(book, shelf, onBookPlaced){
+    BooksAPI.update(book, shelf).then((library) => {
       //Replacing the book stored in state with the one just updated
       let shelfs = Object.keys(library);
       this.setState({books: this.state.books.map((book) => {
@@ -48,7 +48,11 @@ class BooksApp extends React.Component {
         })
         return book
       })
-      })
+      },() => {
+        //Book has been placed and set to state, notify it if needed
+        onBookPlaced && onBookPlaced();
+        }
+      )
     })
   }
 
@@ -58,80 +62,30 @@ class BooksApp extends React.Component {
     query && this.doSearch(query);
   }
 
-  onBookPick(bookid,e){
-    const shelf = 'wantToRead';
-    BooksAPI.update({id: bookid}, shelf).then((result) => {
+  onBookPick(book,shelf){
+    //Placing the book on the shelf
+    this.onShelfChange(book, shelf, () => {
       //All done, removing that book from searched list
-      this.setState({orphanBooks: this.state.orphanBooks.filter((book) => { return (book.id !== bookid)})});
-      
-      /**
-       * Refreshing the libraryygetting the single book in place of refreshing the full list (it can be huge!)
-       * That part is not used now that Router has been added, but it should be useful in case of Pick feature is added as part of library (not a separate page)
-       */
-      //Verifying if the new book has been added into the shelf
-      if (result[shelf].find((id) => { return id === bookid})){
-        //new book is there... pick and push 
-        BooksAPI.get(bookid).then((book) => {
-          let library = this.state.books.concat([book]);
-          this.setState({ books: library});
-        })
-      }
-    })
+      this.setState({orphanBooks: this.state.orphanBooks.filter((b) => { return (b.id !== book.id)})});
+    });
   }
 
   render() {
     return (
       <BrowserRouter>
-      <div className="app">
-      <Route path="/pick" render={() => (
-        <div className="search-books">
-        <div className="search-books-bar">
-          <a className="close-search" href="/">Close</a>
-          <div className="search-books-input-wrapper">
-            <input type="text" placeholder="Search by title or author" onChange={(e) => this.onSearch(e)}/>
-          </div>
-        </div>
-        <div className="search-books-results">
-          <ol className="books-grid">
-          { this.state.orphanBooks.map((book) => {
-              return( <li key={book.id}>
-                        <Book book={book} onBookPick={(bookid, e) => this.onBookPick(bookid, e)} />
-                      </li>)
-            })
-          }
-          </ol>
-        </div>
-      </div>
-      )} />
+        <div className="app">
+          <Route path="/pick" render={() => 
+            <Finder 
+              books={this.state.orphanBooks}
+              onSearch={(e) => this.onSearch(e)}
+              onShelfChange={(book, shelf) => this.onBookPick(book, shelf)} />} />
 
-      <Route path="/" exact render={() => (
-          <div className="list-books">
-            <div className="list-books-title">
-              <h1>MyReads</h1>
-            </div>
-            <div className="list-books-content">
-              <div>
-                <BookShelf  
-                  section="Currently Reading" 
-                  books={this.state.books.filter((book) => { return book.shelf === 'currentlyReading'})} 
-                  onShelfChange={(book, e) => this.onShelfChange(book, e)}/>
-                <BookShelf 
-                  section="Want to Read" 
-                  books={this.state.books.filter((book) => { return book.shelf === 'wantToRead'})} 
-                  onShelfChange={(book, e) => this.onShelfChange(book, e)}/>
-                <BookShelf 
-                  section="Read" 
-                  books={this.state.books.filter((book) => { return book.shelf === 'read'})} 
-                  onShelfChange={(book, e) => this.onShelfChange(book, e)}/>
-              </div>
-            </div>
-            <div className="open-search">
-              <a href="/pick" >Add a book</a>
-            </div>
-          </div>
-    )} />
-      
-      </div>
+          <Route path="/" exact render={() =>
+            <Library
+              books={this.state.books} 
+              onShelfChange={(book, shelf) => this.onShelfChange(book, shelf)} />} />
+          
+        </div>
       </BrowserRouter>
     )
   }
