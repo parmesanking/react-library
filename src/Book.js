@@ -26,7 +26,7 @@ class Book extends React.Component {
             <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: 'url("' + thumbNail + '")' }}></div>
             {this.props.selector && <ShelfSelector book={this.props.book} onShelfChange={this.props.onShelfChange}/>}
             
-            {this.props.onBookPick && <a href="#" onClick={this.onBookPicked.bind(this, this.props.book.id)} className="divOverlayAdd" ><div><div>+</div></div></a>}
+            {this.props.onBookPick && <a href="#" onClick={() => this.onBookPicked(this.props.book.id)} className="divOverlayAdd" ><div><div>+</div></div></a>}
           </div>
           <div className="book-title">{this.props.book.title}</div>
           <div className="book-authors">{this.props.book.authors && this.props.book.authors.map((author) => {

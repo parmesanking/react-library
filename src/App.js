@@ -88,14 +88,14 @@ class BooksApp extends React.Component {
         <div className="search-books-bar">
           <a className="close-search" href="/">Close</a>
           <div className="search-books-input-wrapper">
-            <input type="text" placeholder="Search by title or author" onChange={this.onSearch.bind(this)}/>
+            <input type="text" placeholder="Search by title or author" onChange={(e) => this.onSearch(e)}/>
           </div>
         </div>
         <div className="search-books-results">
           <ol className="books-grid">
           { this.state.orphanBooks.map((book) => {
               return( <li key={book.id}>
-                        <Book book={book} onBookPick={this.onBookPick.bind(this)} />
+                        <Book book={book} onBookPick={(bookid, e) => this.onBookPick(bookid, e)} />
                       </li>)
             })
           }
@@ -114,15 +114,15 @@ class BooksApp extends React.Component {
                 <BookShelf  
                   section="Currently Reading" 
                   books={this.state.books.filter((book) => { return book.shelf === 'currentlyReading'})} 
-                  onShelfChange={this.onShelfChange.bind(this)}/>
+                  onShelfChange={(book, e) => this.onShelfChange(book, e)}/>
                 <BookShelf 
                   section="Want to Read" 
                   books={this.state.books.filter((book) => { return book.shelf === 'wantToRead'})} 
-                  onShelfChange={this.onShelfChange.bind(this)} />
+                  onShelfChange={(book, e) => this.onShelfChange(book, e)}/>
                 <BookShelf 
                   section="Read" 
                   books={this.state.books.filter((book) => { return book.shelf === 'read'})} 
-                  onShelfChange={this.onShelfChange.bind(this)} />
+                  onShelfChange={(book, e) => this.onShelfChange(book, e)}/>
               </div>
             </div>
             <div className="open-search">
