@@ -1,7 +1,8 @@
 import React from "react";
-import { Route, BrowserRouter } from "react-router-dom";
+import { Route, BrowserRouter, Switch } from "react-router-dom";
 import Library from "./Library.js";
 import Finder from "./Finder.js";
+import NotFound from "./NotFound.js";
 import * as BooksAPI from "./BooksAPI";
 import "./App.css";
 import { debounce } from "lodash";
@@ -12,15 +13,21 @@ class BooksApp extends React.Component {
     this.doSearch = debounce(query => {
       BooksAPI.search(query, 10)
         .then(result => {
-          this.setState({
-            orphanBooks: result && result.length > 0 ? result : []
-          });
+          //book already in the ilbrary should be decorated with shelf name
+          let books = result
+            ? result.map(book => {
+                let b = this.state.books.find(b => b.id === book.id);
+                book.shelf = b ? b.shelf : "";
+                return book;
+              })
+            : [];
+          this.setState({ orphanBooks: books });
         })
         .catch(err => {
           //TODO error handling
           console.log(err);
         });
-    }, 1000);
+    }, 300);
   }
 
   state = {
@@ -67,7 +74,11 @@ class BooksApp extends React.Component {
   onSearch(e) {
     let query = e.target.value;
     //Searching on backend without http flooding
-    query && this.doSearch(query);
+    if (query) {
+      this.doSearch(query);
+    } else {
+      this.setState({ orphanBooks: [] });
+    }
   }
 
   onBookPick(book, shelf) {
@@ -86,27 +97,32 @@ class BooksApp extends React.Component {
     return (
       <BrowserRouter>
         <div className="app">
-          <Route
-            path="/pick"
-            render={() => (
-              <Finder
-                books={this.state.orphanBooks}
-                onSearch={e => this.onSearch(e)}
-                onShelfChange={(book, shelf) => this.onBookPick(book, shelf)}
-              />
-            )}
-          />
+          <Switch>
+            <Route
+              path="/search"
+              render={() => (
+                <Finder
+                  books={this.state.orphanBooks}
+                  onSearch={e => this.onSearch(e)}
+                  onShelfChange={(book, shelf) => this.onBookPick(book, shelf)}
+                />
+              )}
+            />
 
-          <Route
-            path="/"
-            exact
-            render={() => (
-              <Library
-                books={this.state.books}
-                onShelfChange={(book, shelf) => this.onShelfChange(book, shelf)}
-              />
-            )}
-          />
+            <Route
+              path="/"
+              exact
+              render={() => (
+                <Library
+                  books={this.state.books}
+                  onShelfChange={(book, shelf) =>
+                    this.onShelfChange(book, shelf)
+                  }
+                />
+              )}
+            />
+            <Route component={NotFound}/>
+          </Switch>
         </div>
       </BrowserRouter>
     );
